@@ -40,12 +40,19 @@ pipeline {
         }
 
         stage('Deploy to Tomcat') {
-            steps {
-                // Étape de déploiement (Livraison continue) demandée dans votre support
-                deploy adapters: [tomcat9(path: '', url: 'http://localhost:8080')], 
-                       contextPath: 'country-service', 
-                       war: 'target/*.war'
-            }
+          steps {
+        // On utilise 'sh' pour copier le fichier vers le dossier de Tomcat
+        // Adaptez le chemin '/opt/tomcat/webapps' selon votre installation
+        sh 'cp target/*.jar /chemin/vers/votre/tomcat/webapps/'
+        
+        // Ou si vous utilisez le plugin "Deploy to container", utilisez cette syntaxe :
+        /*
+        deploy adapters: [tomcat9(credentialsId: 'tomcat-admin', url: 'http://localhost:8080')], 
+               contextPath: 'mon-application', 
+               war: 'target/*.jar'
+        */
+         }
+         }
         }
     }
 }
