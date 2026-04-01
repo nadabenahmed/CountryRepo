@@ -9,47 +9,42 @@ pipeline {
     stages {
         stage('Checkout code') {
             steps {
-                git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git'
+                // Récupération du code depuis votre dépôt GitHub
+                git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git' [cite: 46]
             }
         }
 
         stage('Compile code') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn clean compile' [cite: 52]
             }
         }
 
         stage('Test code') {
             steps {
-                // Note : -DskipTests compile les tests mais ne les exécute pas
-                sh 'mvn test -DskipTests'
+                // Exécution des tests JUnit
+                sh 'mvn test' [cite: 61]
             }
             post {
-                always {
-                    // Archive les rapports même si les tests échouent
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                success {
+                    // Archive les rapports de tests au format XML pour Jenkins
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml' [cite: 64]
                 }
             }
         }
 
         stage('Package code') {
             steps {
-                sh 'mvn package -DskipTests'
+                // Génération du fichier final (assurez-vous d'avoir <packaging>war</packaging> dans votre pom.xml)
+                sh 'mvn package -DskipTests' [cite: 79]
             }
         }
 
         stage('Deploy to Tomcat') {
             steps {
-                // Option A : Copie directe (si Tomcat est sur la même machine que Jenkins)
-                // Remplacez '/opt/tomcat/webapps/' par votre vrai chemin
-                sh 'cp target/*.jar /opt/tomcat/webapps/'
-                
-                // Option B : Via Plugin "Deploy to container" (Syntaxe correcte)
-                /*
-                deploy adapters: [tomcat9(credentialsId: 'tomcat-admin', url: 'http://localhost:8080')], 
-                       contextPath: 'country-service', 
-                       war: 'target/*.jar'
-                */
+                // Déploiement par copie directe vers le répertoire webapps de Tomcat 10
+                // Note : Jenkins doit avoir les droits d'écriture sur ce dossier
+                sh 'cp target/*.war /var/lib/tomcat10/webapps/' [cite: 21, 23]
             }
         }
     }
