@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        // Doit correspondre au nom configuré dans "Global Tool Configuration" sur Jenkins
+        // Doit correspondre au nom configuré dans "Global Tool Configuration"
         maven 'M2_HOME' 
     }
 
@@ -21,12 +21,12 @@ pipeline {
 
         stage('Test code') {
             steps {
-                // On ajoute -DskipTests pour éviter l'erreur de connexion MySQL (Connection refused)
+                // Note : -DskipTests compile les tests mais ne les exécute pas
                 sh 'mvn test -DskipTests'
             }
             post {
-                success {
-                    // Archive les rapports s'ils existent
+                always {
+                    // Archive les rapports même si les tests échouent
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
                 }
             }
@@ -34,25 +34,23 @@ pipeline {
 
         stage('Package code') {
             steps {
-                // Génère le fichier .war ou .jar final
                 sh 'mvn package -DskipTests'
             }
         }
 
         stage('Deploy to Tomcat') {
-          steps {
-        // On utilise 'sh' pour copier le fichier vers le dossier de Tomcat
-        // Adaptez le chemin '/opt/tomcat/webapps' selon votre installation
-        sh 'cp target/*.jar /chemin/vers/votre/tomcat/webapps/'
-        
-        // Ou si vous utilisez le plugin "Deploy to container", utilisez cette syntaxe :
-        /*
-        deploy adapters: [tomcat9(credentialsId: 'tomcat-admin', url: 'http://localhost:8080')], 
-               contextPath: 'mon-application', 
-               war: 'target/*.jar'
-        */
-         }
-         }
+            steps {
+                // Option A : Copie directe (si Tomcat est sur la même machine que Jenkins)
+                // Remplacez '/opt/tomcat/webapps/' par votre vrai chemin
+                sh 'cp target/*.jar /opt/tomcat/webapps/'
+                
+                // Option B : Via Plugin "Deploy to container" (Syntaxe correcte)
+                /*
+                deploy adapters: [tomcat9(credentialsId: 'tomcat-admin', url: 'http://localhost:8080')], 
+                       contextPath: 'country-service', 
+                       war: 'target/*.jar'
+                */
+            }
         }
     }
 }
