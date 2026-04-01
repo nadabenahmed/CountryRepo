@@ -10,12 +10,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
-        <relativePath/> </parent>
+        <relativePath/> 
+    </parent>
 
     <groupId>com.example</groupId>
     <artifactId>country-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>country-service</name>
+    <packaging>war</packaging> <name>country-service</name>
     <description>Country Service API</description>
 
     <properties>
@@ -26,6 +27,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -74,7 +81,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
-                </plugin>
+            </plugin>
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>
