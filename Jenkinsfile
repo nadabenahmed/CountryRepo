@@ -2,40 +2,37 @@ pipeline {
     agent any
 
     tools {
-        maven 'M2_HOME' 
+        maven 'M2_HOME'
     }
 
     stages {
+
         stage('Checkout code') {
             steps {
-                git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git'
+                git branch: 'master', url: 'https://github.com/TON_USERNAME/country-service.git'
             }
         }
 
         stage('Compile code') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn compile'
             }
         }
 
         stage('Test code') {
             steps {
-                // On ignore les tests ici car MySQL n'est pas installé
-                sh 'mvn test -DskipTests'
+                sh 'mvn test'
+            }
+            post {
+                success {
+                    junit '**/target/surefire-reports/*.xml'
+                }
             }
         }
 
         stage('Package code') {
             steps {
-                // Génère le fichier .war pour Tomcat
-                sh 'mvn package -DskipTests'
-            }
-        }
-
-        stage('Deploy to Tomcat') {
-            steps {
-                // Déploiement vers le dossier que vous avez configuré
-                sh 'cp target/*.war /var/lib/tomcat10/webapps/'
+                sh 'mvn package'
             }
         }
     }
