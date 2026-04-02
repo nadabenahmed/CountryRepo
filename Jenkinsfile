@@ -9,7 +9,7 @@ pipeline {
 
         stage('Checkout code') {
             steps {
-                git branch: 'master', url: 'https://github.com/TON_USERNAME/country-service.git'
+                git branch: 'master', url: 'https://github.com/nadabenahmed/country-service.git'
             }
         }
 
