@@ -20,32 +20,44 @@ pipeline {
 
         stage('Test code') {
             steps {
-                // On ignore les tests ici car MySQL n'est pas installé
+                // On utilise -DskipTests si votre base de données n'est pas prête, 
+                // sinon laissez 'mvn test'
                 sh 'mvn test -DskipTests'
+            }
+            post {
+                success {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv(installationName: 'MySonarQubeServer') {
+                    sh "mvn sonar:sonar -Dsonar.projectKey=country-service -Dsonar.projectName=country-service"
+                }
             }
         }
 
         stage('Package code') {
             steps {
-                // Génère le fichier .war pour Tomcat
                 sh 'mvn package -DskipTests'
             }
         }
-
+        
         stage('Deploy to Tomcat') {
             steps {
-                // Déploiement vers le dossier que vous avez configuré
+                // Copie du fichier WAR vers le répertoire de déploiement Tomcat
                 sh 'cp target/*.war /var/lib/tomcat10/webapps/'
             }
         }
     }
 
-    // Bloc ajouté pour afficher le message de succès
     post {
         success {
-            
+            echo '--------------------------------------------------'
             echo 'Pipeline completed successfully!'
-            
+            echo '--------------------------------------------------'
         }
         failure {
             echo 'Pipeline failed. Please check the logs.'
