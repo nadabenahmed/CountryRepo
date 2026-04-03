@@ -4,7 +4,7 @@ pipeline {
 
     stages {
         stage('Checkout code') {
-            steps { git branch: 'master', url: 'https://github.com/Jmouna/CountryRepo.git' }
+            steps { git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git' }
         }
         stage('Compile code') {
             steps { sh 'mvn clean compile' }
