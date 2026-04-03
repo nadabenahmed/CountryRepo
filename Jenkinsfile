@@ -39,4 +39,16 @@ pipeline {
             }
         }
     }
+
+    // Bloc ajouté pour afficher le message de succès
+    post {
+        success {
+            echo '--------------------------------------------------'
+            echo 'Pipeline completed successfully!'
+            echo '--------------------------------------------------'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
+    }
 }
