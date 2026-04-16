@@ -1,5 +1,7 @@
 FROM eclipse-temurin:21-jdk
-VOLUME /tmp
-# Suppression des espaces entre target/, *. et jar
-COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+WORKDIR /app
+
+COPY target/country-service-0.0.1-SNAPSHOT.jar app.jar
+
+ENTRYPOINT ["java","-jar","app.jar"]
