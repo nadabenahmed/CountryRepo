@@ -2,10 +2,11 @@ pipeline {
     agent any
 
     tools {
-        maven 'M2_HOME' 
+        maven 'Maven3'
     }
 
     stages {
+
         stage('Checkout code') {
             steps {
                 git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git'
@@ -20,35 +21,45 @@ pipeline {
 
         stage('Test code') {
             steps {
-                // On ignore les tests ici car MySQL n'est pas installé
-                sh 'mvn test -DskipTests'
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQubeServer') {
+                    sh """
+                    mvn sonar:sonar \
+                    -Dsonar.projectKey=country-service \
+                    -Dsonar.projectName=country-service \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=YOUR_TOKEN
+                    """
+                }
             }
         }
 
         stage('Package code') {
             steps {
-                // Génère le fichier .war pour Tomcat
-                sh 'mvn package -DskipTests'
+                sh 'mvn package'
             }
         }
 
-        stage('Deploy to Tomcat') {
+        stage('Deploy') {
             steps {
-                // Déploiement vers le dossier que vous avez configuré
-                sh 'cp target/*.war /var/lib/tomcat10/webapps/'
+                sh 'java -jar target/*.jar &'
             }
         }
     }
 
-    // Bloc ajouté pour afficher le message de succès
     post {
         success {
-            echo '--------------------------------------------------'
             echo 'Pipeline completed successfully!'
-            echo '--------------------------------------------------'
-        }
-        failure {
-            echo 'Pipeline failed. Please check the logs.'
         }
     }
 }
