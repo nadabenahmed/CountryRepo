@@ -1,39 +1,65 @@
 pipeline {
     agent any
-    tools { maven 'M2_HOME' }
+
+    tools {
+        maven 'Maven3'
+    }
 
     stages {
+
         stage('Checkout code') {
-            steps { git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git' }
-        }
-        stage('Compile code') {
-            steps { sh 'mvn clean compile' }
-        }
-        stage('Test code') {
-            steps { sh 'mvn test -DskipTests' }
-            post {
-                success { junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml' }
+            steps {
+                git branch: 'master', url: 'https://github.com/nadabenahmed/CountryRepo.git'
             }
         }
-        stage('SonarQube Analysis') {
+
+        stage('Compile code') {
             steps {
-                withSonarQubeEnv(installationName: 'MySonarQubeServer') {
-                    sh "mvn sonar:sonar -Dsonar.projectKey=country-service -Dsonar.projectName=country-service"
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Test code') {
+            steps {
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
-        stage('Package code') {
-            steps { sh 'mvn package -DskipTests' }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQubeServer') {
+                    sh """
+                    mvn sonar:sonar \
+                    -Dsonar.projectKey=country-service \
+                    -Dsonar.projectName=country-service \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=YOUR_TOKEN
+                    """
+                }
+            }
         }
-        stage('Deploy to Tomcat') {
-            steps { sh 'cp target/*.war /var/lib/tomcat10/webapps/' }
+
+        stage('Package code') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'java -jar target/*.jar &'
+            }
         }
     }
+
     post {
         success {
-            echo '--------------------------------------------------'
             echo 'Pipeline completed successfully!'
-            echo '--------------------------------------------------'
         }
     }
 }
